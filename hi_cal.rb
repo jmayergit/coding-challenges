@@ -1,4 +1,7 @@
-# sorts interview times then combines continguous and/or overlapping meetings
+# https://www.interviewcake.com/question/ruby/merging-ranges
+
+######## Solution 1 ###############
+## sorts interview times then combines continguous and/or overlapping meetings
 
 def merge(left, right)
   result = []
@@ -45,40 +48,56 @@ def mergeSort(list)
   end
 end
 
-# crazy solution that doesn't sort
+# For example:
+# meaningful_overlap_or_contiguous([0,2],[1,3]) => true
+# meaningful_overlap_or_contiguous([0,2],[2,3]) => true
+# meaningful_overlap_or_contiguous([0,2],[3,4]) => false
+# meaningful_overlap_or_contiguous([0,2],[1,2]) => false
+def meaningful_overlap_or_contiguous(before_range, after_range)
+  return (after_range[0] <= before_range[1]) && (after_range[1] > before_range[1])
+end
 
 def condense_meeting_times(meeting_time_ranges)
-  # takes an array of meeting time ranges and returns an array of condensed ranges
-  # https://www.interviewcake.com/question/ruby/merging-ranges
+  sorted_meeting_time_ranges = mergeSort(meeting_time_ranges)
+  condensed_ranges = []
+  sorted_meeting_time_ranges.each do |range|
+    if condensed_ranges.empty?
+      condensed_ranges << range
+    else
+      if meaningful_overlap_or_contiguous(condensed_ranges[-1], range)
+        condensed_ranges[-1][1] = range[1]
+      else
+        condensed_ranges.insert(-1, range)
+      end
+    end
+  end
 
+  return condensed_ranges
+end
+
+######## Solution 2 ###############
+## crazy initial solution, doesn't sort and takes at least O(n^2.75) time
+
+def condense_meeting_times_2(meeting_time_ranges)
   i = 0
   while i < meeting_time_ranges.length
     amoeba = meeting_time_ranges[i]
     j = 0
-    puts "amoeba:"
-    print amoeba
-    puts "\n"
     while j < meeting_time_ranges.length
       unless j == i
         current = meeting_time_ranges[j]
-        puts "current:"
-        print current
-        puts "\n"
         # right extension
         if (current[0] >= amoeba[0] && current[0] <= amoeba[1]) && (current[1] > amoeba[1])
-          puts "right extension"
           meeting_time_ranges[i] = [amoeba[0], current[1]]
           meeting_time_ranges.delete_at(j)
           j = 0
         # left extension
         elsif (current[0] < amoeba[0]) && (current[1] >= amoeba[0] && current[1] <= amoeba[1])
-          puts "left extension"
           meeting_time_ranges[i] = [current[0], amoeba[1]]
           meeting_time_ranges.delete_at(j)
           j = 0
         # within
         elsif (current[0] >= amoeba[0]) && (current[1] <= amoeba[1])
-          puts "within"
           meeting_time_ranges.delete_at(j)
         else
           j += 1
@@ -93,9 +112,5 @@ def condense_meeting_times(meeting_time_ranges)
     i += 1
   end
 
-  puts "RETURN:"
-  print meeting_time_ranges
+  meeting_time_ranges
 end
-
-
-condense_meeting_times(      [ [0, 1], [3, 5], [4, 8], [10, 12], [9, 10] ])
