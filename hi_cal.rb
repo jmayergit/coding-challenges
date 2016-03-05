@@ -1,7 +1,7 @@
 # https://www.interviewcake.com/question/ruby/merging-ranges
 
 ######## Solution 1 ###############
-## sorts interview times then combines continguous and/or overlapping meetings
+## sorts meeting times then combines continguous and/or overlapping meetings
 
 def merge(left, right)
   result = []
